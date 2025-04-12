@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fazer Pedido</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f2f4f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+      color: #333;
+    }
+    label {
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fazer Pedido</h1>
+    <label for="nome">Seu nome:</label>
+    <input type="text" id="nome" placeholder="Digite seu nome">
+
+    <label for="item">Escolha seu pedido:</label>
+    <select id="item">
+        <option value="Misto quente">Misto quente</option>
+      <option value="Pão na chapa">Pão na chapa</option>
+      <option value="Pão c/ manteiga">Pão c/ manteiga</option>
+      <option value="Pão c/ ovo">Pão c/ ovo</option>
+    </select>
+
+    <button onclick="enviarPedido()">Enviar Pedido</button>
+  </div>
+
+  <script>
+    function enviarPedido() {
+      const nome = document.getElementById('nome').value.trim();
+      const item = document.getElementById('item').value;
+
+      if (!nome) {
+        alert('Por favor, digite seu nome.');
+        return;
+      }
+
+      const pedido = {
+        nome,
+        item,
+        horario: new Date().toLocaleTimeString()
+      };
+
+      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+      pedidos.push(pedido);
+      localStorage.setItem('pedidos', JSON.stringify(pedidos));
+
+      alert('Pedido enviado com sucesso!');
+      document.getElementById('nome').value = '';
+    }
+  </script>
+</body>
+</html>
