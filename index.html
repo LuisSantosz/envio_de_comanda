@@ -1,83 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fazer Pedido</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background: #f2f4f8;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      padding: 20px;
       min-height: 100vh;
     }
+
     .container {
-      background: white;
+      background: #fff;
       padding: 30px;
       border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
+      max-width: 500px;
     }
+
     h1 {
       text-align: center;
-      font-size: 24px;
       color: #333;
-      margin-bottom: 20px;
+      font-size: 1.8rem;
+      margin-bottom: 24px;
     }
+
     label {
-      display: block;
       font-weight: 600;
-      color: #555;
-      margin-bottom: 5px;
+      color: #444;
+      display: block;
+      margin-bottom: 8px;
     }
-    input, button {
+
+    input[type="text"] {
       width: 100%;
       padding: 12px;
       font-size: 16px;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
-    input {
-      padding-left: 10px;
-    }
-    button {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background-color: #2563eb;
-    }
-    .quantidade-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .quantidade {
-      width: 30px;
-      text-align: center;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      padding: 5px;
-      border-radius: 4px;
-    }
-    .pedido-item {
+
+    .item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    .pedido-item span {
-      font-size: 18px;
+      margin-bottom: 14px;
+      font-size: 16px;
       color: #333;
     }
-    #confirmacao {
+
+    .quantidade {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .quantidade button {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background-color: #3b82f6;
+      color: white;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .quantidade button:hover {
+      background-color: #2563eb;
+    }
+
+    .quantidade span {
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .btn-enviar {
+      width: 100%;
+      padding: 14px;
+      background-color: #3b82f6;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 20px;
+    }
+
+    .btn-enviar:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-cozinha {
+      width: 100%;
+      padding: 12px;
+      background-color: #10b981;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+
+    .mensagem-confirmacao {
       position: fixed;
       top: 20px;
       left: 50%;
@@ -92,9 +134,25 @@
       transition: opacity 0.4s ease, transform 0.4s ease;
       z-index: 9999;
     }
-    #confirmacao.mostrar {
+
+    .mensagem-confirmacao.mostrar {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .quantidade {
+        margin-top: 6px;
+      }
     }
   </style>
 </head>
@@ -102,67 +160,61 @@
   <div class="container">
     <h1>Fazer Pedido</h1>
     <label for="nome">Seu nome:</label>
-    <input type="text" id="nome" placeholder="Digite seu nome">
+    <input type="text" id="nome" placeholder="Digite seu nome" />
 
-    <div>
-      <label>Escolha seu pedido:</label>
-      <div class="pedido-item">
-        <span>Pão com ovo</span>
-        <div class="quantidade-container">
-          <button onclick="alterarQuantidade('paoComOvo', -1)">-</button>
-          <input type="text" id="paoComOvo" class="quantidade" value="0" readonly>
-          <button onclick="alterarQuantidade('paoComOvo', 1)">+</button>
-        </div>
-      </div>
-      <div class="pedido-item">
-        <span>Pão na chapa</span>
-        <div class="quantidade-container">
-          <button onclick="alterarQuantidade('paoNaChapa', -1)">-</button>
-          <input type="text" id="paoNaChapa" class="quantidade" value="0" readonly>
-          <button onclick="alterarQuantidade('paoNaChapa', 1)">+</button>
-        </div>
-      </div>
-      <div class="pedido-item">
-        <span>Misto quente</span>
-        <div class="quantidade-container">
-          <button onclick="alterarQuantidade('mistoQuente', -1)">-</button>
-          <input type="text" id="mistoQuente" class="quantidade" value="0" readonly>
-          <button onclick="alterarQuantidade('mistoQuente', 1)">+</button>
-        </div>
-      </div>
-      <div class="pedido-item">
-        <span>Pão com manteiga</span>
-        <div class="quantidade-container">
-          <button onclick="alterarQuantidade('paoComManteiga', -1)">-</button>
-          <input type="text" id="paoComManteiga" class="quantidade" value="0" readonly>
-          <button onclick="alterarQuantidade('paoComManteiga', 1)">+</button>
-        </div>
+    <div class="item">
+      <span>Pão com manteiga</span>
+      <div class="quantidade">
+        <button onclick="alterarQuantidade('paoComManteiga', -1)">-</button>
+        <span id="qtd-paoComManteiga">0</span>
+        <button onclick="alterarQuantidade('paoComManteiga', 1)">+</button>
       </div>
     </div>
 
-    <button onclick="enviarPedido()">Enviar Pedido</button>
+    <div class="item">
+      <span>Pão com ovo</span>
+      <div class="quantidade">
+        <button onclick="alterarQuantidade('paoComOvo', -1)">-</button>
+        <span id="qtd-paoComOvo">0</span>
+        <button onclick="alterarQuantidade('paoComOvo', 1)">+</button>
+      </div>
+    </div>
 
-    <a href="cozinha.html" style="display:block; margin-top: 20px; text-align:center;">
-      <button style="background-color:#10b981; color:white; padding:12px 20px; border:none; border-radius:8px; font-size:16px;">
-        Ir para a Cozinha
-      </button>
-    </a>
+    <div class="item">
+      <span>Pão na chapa</span>
+      <div class="quantidade">
+        <button onclick="alterarQuantidade('paoNaChapa', -1)">-</button>
+        <span id="qtd-paoNaChapa">0</span>
+        <button onclick="alterarQuantidade('paoNaChapa', 1)">+</button>
+      </div>
+    </div>
+
+    <div class="item">
+      <span>Misto quente</span>
+      <div class="quantidade">
+        <button onclick="alterarQuantidade('mistoQuente', -1)">-</button>
+        <span id="qtd-mistoQuente">0</span>
+        <button onclick="alterarQuantidade('mistoQuente', 1)">+</button>
+      </div>
+    </div>
+
+    <button class="btn-enviar" onclick="enviarPedido()">Enviar Pedido</button>
+    <a href="cozinha.html"><button class="btn-cozinha">Ir para a Cozinha</button></a>
   </div>
 
   <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
 
   <script>
-    let quantidades = {
+    const quantidades = {
+      paoComManteiga: 0,
       paoComOvo: 0,
       paoNaChapa: 0,
       mistoQuente: 0,
-      paoComManteiga: 0
     };
 
     function alterarQuantidade(item, valor) {
-      quantidades[item] += valor;
-      if (quantidades[item] < 0) quantidades[item] = 0;
-      document.getElementById(item).value = quantidades[item];
+      quantidades[item] = Math.max(0, quantidades[item] + valor);
+      document.getElementById(`qtd-${item}`).innerText = quantidades[item];
     }
 
     function enviarPedido() {
@@ -172,9 +224,15 @@
         return;
       }
 
+      const algumItemSelecionado = Object.values(quantidades).some(qtd => qtd > 0);
+      if (!algumItemSelecionado) {
+        alert('Selecione ao menos um item.');
+        return;
+      }
+
       const pedido = {
         nome,
-        quantidades,
+        quantidades: { ...quantidades },
         horario: new Date().toLocaleTimeString()
       };
 
@@ -189,6 +247,10 @@
       }, 3000);
 
       document.getElementById('nome').value = '';
+      for (let item in quantidades) {
+        quantidades[item] = 0;
+        document.getElementById(`qtd-${item}`).innerText = '0';
+      }
     }
   </script>
 </body>
