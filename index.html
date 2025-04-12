@@ -5,9 +5,7 @@
   <title>Fazer Pedido</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
       background: #f2f4f8;
@@ -15,52 +13,71 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      margin: 0;
     }
     .container {
       background: white;
       padding: 30px;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 100%;
       max-width: 400px;
+      width: 100%;
     }
     h1 {
-      margin-bottom: 20px;
-      font-size: 24px;
       text-align: center;
+      font-size: 24px;
       color: #333;
+      margin-bottom: 20px;
     }
     label {
-      margin-bottom: 5px;
+      display: block;
       font-weight: 600;
       color: #555;
+      margin-bottom: 5px;
     }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    button {
+    input, button {
       width: 100%;
       padding: 12px;
-      background: #3b82f6;
-      color: white;
       font-size: 16px;
-      border: none;
       border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    input {
+      padding-left: 10px;
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
       cursor: pointer;
       transition: background 0.3s;
     }
     button:hover {
-      background: #2563eb;
+      background-color: #2563eb;
     }
-
-    /* Animação de confirmação */
-    .mensagem-confirmacao {
+    .quantidade-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .quantidade {
+      width: 30px;
+      text-align: center;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    .pedido-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pedido-item span {
+      font-size: 18px;
+      color: #333;
+    }
+    #confirmacao {
       position: fixed;
       top: 20px;
       left: 50%;
@@ -75,8 +92,7 @@
       transition: opacity 0.4s ease, transform 0.4s ease;
       z-index: 9999;
     }
-
-    .mensagem-confirmacao.mostrar {
+    #confirmacao.mostrar {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
@@ -88,31 +104,69 @@
     <label for="nome">Seu nome:</label>
     <input type="text" id="nome" placeholder="Digite seu nome">
 
-    <label for="item">Escolha seu pedido:</label>
-    <select id="item">
-      <option value="Misto quente">Misto quente</option>
-      <option value="Pão na chapa">Pão na chapa</option>
-      <option value="Pão c/ manteiga">Pão com manteiga</option>
-      <option value="Pão c/ ovo">Pão com ovo</option>
-    </select>
+    <div>
+      <label>Escolha seu pedido:</label>
+      <div class="pedido-item">
+        <span>Pão com ovo</span>
+        <div class="quantidade-container">
+          <button onclick="alterarQuantidade('paoComOvo', -1)">-</button>
+          <input type="text" id="paoComOvo" class="quantidade" value="0" readonly>
+          <button onclick="alterarQuantidade('paoComOvo', 1)">+</button>
+        </div>
+      </div>
+      <div class="pedido-item">
+        <span>Pão na chapa</span>
+        <div class="quantidade-container">
+          <button onclick="alterarQuantidade('paoNaChapa', -1)">-</button>
+          <input type="text" id="paoNaChapa" class="quantidade" value="0" readonly>
+          <button onclick="alterarQuantidade('paoNaChapa', 1)">+</button>
+        </div>
+      </div>
+      <div class="pedido-item">
+        <span>Misto quente</span>
+        <div class="quantidade-container">
+          <button onclick="alterarQuantidade('mistoQuente', -1)">-</button>
+          <input type="text" id="mistoQuente" class="quantidade" value="0" readonly>
+          <button onclick="alterarQuantidade('mistoQuente', 1)">+</button>
+        </div>
+      </div>
+      <div class="pedido-item">
+        <span>Pão com manteiga</span>
+        <div class="quantidade-container">
+          <button onclick="alterarQuantidade('paoComManteiga', -1)">-</button>
+          <input type="text" id="paoComManteiga" class="quantidade" value="0" readonly>
+          <button onclick="alterarQuantidade('paoComManteiga', 1)">+</button>
+        </div>
+      </div>
+    </div>
 
     <button onclick="enviarPedido()">Enviar Pedido</button>
 
     <a href="cozinha.html" style="display:block; margin-top: 20px; text-align:center;">
-      <button style="background-color:#10b981; color:white; padding:12px 20px; border:none; border-radius:8px; font-size:16px; cursor:pointer;">
+      <button style="background-color:#10b981; color:white; padding:12px 20px; border:none; border-radius:8px; font-size:16px;">
         Ir para a Cozinha
       </button>
     </a>
   </div>
 
-  <!-- Mensagem de confirmação animada -->
   <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
 
   <script>
+    let quantidades = {
+      paoComOvo: 0,
+      paoNaChapa: 0,
+      mistoQuente: 0,
+      paoComManteiga: 0
+    };
+
+    function alterarQuantidade(item, valor) {
+      quantidades[item] += valor;
+      if (quantidades[item] < 0) quantidades[item] = 0;
+      document.getElementById(item).value = quantidades[item];
+    }
+
     function enviarPedido() {
       const nome = document.getElementById('nome').value.trim();
-      const item = document.getElementById('item').value;
-
       if (!nome) {
         alert('Por favor, digite seu nome.');
         return;
@@ -120,7 +174,7 @@
 
       const pedido = {
         nome,
-        item,
+        quantidades,
         horario: new Date().toLocaleTimeString()
       };
 

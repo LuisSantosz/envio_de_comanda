@@ -5,64 +5,51 @@
   <title>Pedidos da Cozinha</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
       background: #f0f2f5;
-      margin: 0;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-
     h1 {
-      text-align: center;
+      font-size: 24px;
       color: #333;
       margin-bottom: 20px;
     }
-
     .pedido {
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      padding: 15px 20px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       margin: 10px auto;
+      width: 100%;
       max-width: 500px;
       transition: transform 0.2s;
     }
-
     .pedido:hover {
       transform: scale(1.02);
     }
-
     .pedido.finalizado {
-      background: #e0f7e9;
+      background-color: #e0f7e9;
       text-decoration: line-through;
       opacity: 0.7;
     }
-
-    .pedido strong {
-      color: #444;
-    }
-
-    .btn {
-      margin-top: 10px;
+    .btn-finalizar {
+      background-color: #3b82f6;
+      color: white;
       padding: 8px 12px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.3s;
     }
-
-    .btn-finalizar {
-      background-color: #3b82f6;
-      color: white;
-    }
-
     .btn-finalizar:hover {
       background-color: #2563eb;
     }
-
     .btn-limpar {
-      display: block;
-      margin: 30px auto 0;
       background-color: #ef4444;
       color: white;
       padding: 12px 20px;
@@ -70,8 +57,8 @@
       border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
+      margin-top: 20px;
     }
-
     .btn-limpar:hover {
       background-color: #dc2626;
     }
@@ -81,20 +68,20 @@
   <h1>Pedidos Recebidos</h1>
   <div id="lista-pedidos"></div>
   <button class="btn-limpar" onclick="limparFinalizados()">Limpar Pedidos Finalizados</button>
-  <a href="index.html" style="display:block; text-align:center; margin-top: 20px;">
-    <button style="
-      background-color: #10b981;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    ">Voltar ao Pedido</button>
+  <a href="index.html" style="display:block; margin-top: 20px;">
+    <button style="background-color: #10b981; color:white; padding:12px 20px; border:none; border-radius:8px; font-size:16px;">
+      Voltar ao Pedido
+    </button>
   </a>
-  
 
   <script>
+    const nomesBonitos = {
+      paoComOvo: 'Pão com ovo',
+      paoNaChapa: 'Pão na chapa',
+      mistoQuente: 'Misto quente',
+      paoComManteiga: 'Pão com manteiga'
+    };
+
     function carregarPedidos() {
       const container = document.getElementById('lista-pedidos');
       container.innerHTML = '';
@@ -107,11 +94,19 @@
           div.classList.add('finalizado');
         }
 
+        let detalhesQuantidades = '';
+        for (let item in pedido.quantidades) {
+          if (pedido.quantidades[item] > 0) {
+            const nomeItem = nomesBonitos[item] || item;
+            detalhesQuantidades += `<strong>${nomeItem}:</strong> ${pedido.quantidades[item]}<br>`;
+          }
+        }
+
         div.innerHTML = `
           <strong>Nome:</strong> ${pedido.nome}<br>
-          <strong>Item:</strong> ${pedido.item}<br>
           <strong>Horário:</strong> ${pedido.horario}<br>
-          ${!pedido.finalizado ? `<button class="btn btn-finalizar" onclick="marcarComoFinalizado(${index})">Marcar como finalizado</button>` : ''}
+          ${detalhesQuantidades}
+          ${!pedido.finalizado ? `<button class="btn-finalizar" onclick="marcarComoFinalizado(${index})">Marcar como finalizado</button>` : ''}
         `;
         container.appendChild(div);
       });
