@@ -58,6 +58,28 @@
     button:hover {
       background: #2563eb;
     }
+
+    /* Animação de confirmação */
+    .mensagem-confirmacao {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #10b981;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 9999;
+    }
+
+    .mensagem-confirmacao.mostrar {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -68,14 +90,23 @@
 
     <label for="item">Escolha seu pedido:</label>
     <select id="item">
-        <option value="Misto quente">Misto quente</option>
+      <option value="Misto quente">Misto quente</option>
       <option value="Pão na chapa">Pão na chapa</option>
-      <option value="Pão c/ manteiga">Pão c/ manteiga</option>
-      <option value="Pão c/ ovo">Pão c/ ovo</option>
+      <option value="Pão c/ manteiga">Pão com manteiga</option>
+      <option value="Pão c/ ovo">Pão com ovo</option>
     </select>
 
     <button onclick="enviarPedido()">Enviar Pedido</button>
+
+    <a href="cozinha.html" style="display:block; margin-top: 20px; text-align:center;">
+      <button style="background-color:#10b981; color:white; padding:12px 20px; border:none; border-radius:8px; font-size:16px; cursor:pointer;">
+        Ir para a Cozinha
+      </button>
+    </a>
   </div>
+
+  <!-- Mensagem de confirmação animada -->
+  <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
 
   <script>
     function enviarPedido() {
@@ -97,7 +128,12 @@
       pedidos.push(pedido);
       localStorage.setItem('pedidos', JSON.stringify(pedidos));
 
-      alert('Pedido enviado com sucesso!');
+      const confirmacao = document.getElementById('confirmacao');
+      confirmacao.classList.add('mostrar');
+      setTimeout(() => {
+        confirmacao.classList.remove('mostrar');
+      }, 3000);
+
       document.getElementById('nome').value = '';
     }
   </script>
