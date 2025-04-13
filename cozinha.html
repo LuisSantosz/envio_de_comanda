@@ -4,183 +4,208 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pedidos da Cozinha</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f0f2f5;
+      background: #f0f2f5;
+      margin: 0;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     h1 {
-      font-size: 1.8rem;
+      text-align: center;
       color: #333;
       margin-bottom: 20px;
-      text-align: center;
     }
 
     .pedido {
-      background: #fff;
+      background: white;
       border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      margin: 10px 0;
-      width: 100%;
-      max-width: 600px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      padding: 15px 20px;
+      margin: 10px auto;
+      max-width: 500px;
       transition: transform 0.2s;
     }
 
     .pedido:hover {
-      transform: scale(1.01);
+      transform: scale(1.02);
     }
 
     .pedido.finalizado {
-      background-color: #e0f7e9;
+      background: #e0f7e9;
       text-decoration: line-through;
       opacity: 0.7;
     }
 
-    .btn-finalizar,
-    .btn-voltar,
-    .btn-limpar {
-      display: inline-block;
+    .pedido strong {
+      color: #444;
+    }
+
+    .btn-finalizar {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn-finalizar {
       background-color: #3b82f6;
       color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.3s;
-      width: 100%;
-      max-width: 300px;
     }
 
     .btn-finalizar:hover {
       background-color: #2563eb;
     }
 
-    .btn-limpar {
+    .btn-limpar-all {
+      display: block;
+      margin: 20px auto;
       background-color: #ef4444;
-      margin-top: 30px;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
     }
 
-    .btn-limpar:hover {
+    .btn-limpar-all:hover {
       background-color: #dc2626;
     }
 
     .btn-voltar {
       background-color: #10b981;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
       margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .btn-voltar:hover {
       background-color: #059669;
     }
-
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 1.4rem;
-      }
-
-      .pedido {
-        padding: 12px;
-      }
-
-      .btn-finalizar,
-      .btn-limpar,
-      .btn-voltar {
-        font-size: 0.95rem;
-        padding: 10px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .pedido {
-        font-size: 0.95rem;
-      }
-
-      .btn-finalizar,
-      .btn-limpar,
-      .btn-voltar {
-        width: 100%;
-        font-size: 0.9rem;
-      }
-    }
   </style>
 </head>
 <body>
   <h1>Pedidos Recebidos</h1>
+
   <div id="lista-pedidos"></div>
-  <button class="btn-limpar" onclick="limparFinalizados()">Limpar Pedidos Finalizados</button>
-  <a href="index.html" style="text-align: center; width: 100%; max-width: 300px;">
+
+  <!-- Botão para limpar todos os pedidos finalizados -->
+  <button class="btn-limpar-all" onclick="limparFinalizados()">Limpar Pedidos Finalizados</button>
+
+  <a href="index.html">
     <button class="btn-voltar">Voltar ao Pedido</button>
   </a>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
   <script>
-    const nomesBonitos = {
-      paoComOvo: 'Pão com ovo',
-      paoNaChapa: 'Pão na chapa',
-      mistoQuente: 'Misto quente',
-      paoComManteiga: 'Pão com manteiga'
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1i2QTlx6bEWRpU0qoTwyhe9SCJLx07gs",
+      authDomain: "envio-e-recebimento-de-pedidos.firebaseapp.com",
+      databaseURL: "https://envio-e-recebimento-de-pedidos-default-rtdb.firebaseio.com",
+      projectId: "envio-e-recebimento-de-pedidos",
+      storageBucket: "envio-e-recebimento-de-pedidos.firebasestorage.app",
+      messagingSenderId: "985808864703",
+      appId: "1:985808864703:web:60f102b6fac9e402480d0a",
+      measurementId: "G-9D5QYDXPVH"
     };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
+    // Verificar conexão
+    db.ref('.info/connected').on('value', (snap) => {
+      console.log('Conectado ao Firebase:', snap.val());
+    });
+
+    const listaPedidos = document.getElementById('lista-pedidos');
+
+    // Função para carregar pedidos do Firebase
     function carregarPedidos() {
-      const container = document.getElementById('lista-pedidos');
-      container.innerHTML = '';
-      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+      listaPedidos.innerHTML = 'Carregando...';
+      db.ref('pedidos').on('value', 
+        (snapshot) => {
+          listaPedidos.innerHTML = '';
+          const pedidos = snapshot.val() || {};
+          
+          if (Object.keys(pedidos).length === 0) {
+            listaPedidos.innerHTML = '<p style="text-align:center">Nenhum pedido encontrado</p>';
+            return;
+          }
+          
+          for (const key in pedidos) {
+            const pedido = pedidos[key];
+            const divPedido = document.createElement('div');
+            divPedido.classList.add('pedido');
+            if (pedido.finalizado) {
+              divPedido.classList.add('finalizado');
+            }
 
-      pedidos.forEach((pedido, index) => {
-        const div = document.createElement('div');
-        div.className = 'pedido';
-        if (pedido.finalizado) {
-          div.classList.add('finalizado');
+            divPedido.innerHTML = `
+              <strong>Nome:</strong> ${pedido.nome}<br>
+              <strong>Itens:</strong> ${Object.entries(pedido.itens).map(([item, qtd]) => `${item}: ${qtd}`).join(', ')}<br>
+              <strong>Horário:</strong> ${pedido.horario}<br>
+              ${!pedido.finalizado ? `
+                <button class="btn-finalizar" onclick="marcarComoFinalizado('${key}')">Marcar como Finalizado</button>
+              ` : ''}
+            `;
+            listaPedidos.appendChild(divPedido);
+          }
+        },
+        (error) => {
+          console.error("Erro ao carregar pedidos:", error);
+          listaPedidos.innerHTML = 'Erro ao carregar pedidos. Recarregue a página.';
         }
+      );
+    }
 
-        let detalhesQuantidades = '';
-        for (let item in pedido.quantidades) {
-          if (pedido.quantidades[item] > 0) {
-            const nomeItem = nomesBonitos[item] || item;
-            detalhesQuantidades += `<strong>${nomeItem}:</strong> ${pedido.quantidades[item]}<br>`;
+    // Função para marcar pedido como finalizado
+    function marcarComoFinalizado(id) {
+      const pedidoRef = db.ref(`pedidos/${id}`);
+      pedidoRef.update({ finalizado: true })
+        .then(() => console.log('Pedido marcado como finalizado'))
+        .catch(error => console.error('Erro ao finalizar pedido:', error));
+    }
+
+    // Função para limpar todos os pedidos finalizados
+    function limparFinalizados() {
+      db.ref('pedidos').once('value', (snapshot) => {
+        const pedidos = snapshot.val() || {};
+        const updates = {};
+        
+        for (const key in pedidos) {
+          if (pedidos[key].finalizado) {
+            updates[key] = null; // Marca para remoção
           }
         }
-
-        div.innerHTML = `
-          <strong>Nome:</strong> ${pedido.nome}<br>
-          <strong>Horário:</strong> ${pedido.horario}<br>
-          ${detalhesQuantidades}
-          ${!pedido.finalizado ? `<button class="btn-finalizar" onclick="marcarComoFinalizado(${index})">Marcar como finalizado</button>` : ''}
-        `;
-        container.appendChild(div);
+        
+        db.ref('pedidos').update(updates)
+          .then(() => console.log('Pedidos finalizados removidos'))
+          .catch(error => console.error('Erro ao remover pedidos:', error));
       });
     }
 
-    function marcarComoFinalizado(index) {
-      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-      pedidos[index].finalizado = true;
-      localStorage.setItem('pedidos', JSON.stringify(pedidos));
-      carregarPedidos();
-    }
+    // Listener para novos pedidos
+    db.ref('pedidos').orderByChild('finalizado').equalTo(false).on('child_added', (snapshot) => {
+      console.log('Novo pedido recebido:', snapshot.val());
+      // Você pode adicionar um efeito visual/sonoro aqui
+    });
 
-    function limparFinalizados() {
-      let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-      pedidos = pedidos.filter(p => !p.finalizado);
-      localStorage.setItem('pedidos', JSON.stringify(pedidos));
-      carregarPedidos();
-    }
-
-    setInterval(carregarPedidos, 5000);
-    carregarPedidos();
+    carregarPedidos(); // Carregar os pedidos ao carregar a página
   </script>
 </body>
 </html>

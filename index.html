@@ -4,119 +4,155 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fazer Pedido</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f2f4f8;
+      --text: #333;
+      --card: #fff;
+      --primary: #3b82f6;
+      --accent: #10b981;
+      --danger: #ef4444;
+    }
+
+    body.dark {
+      --bg: #1a1c1f;
+      --text: #f5f5f5;
+      --card: #2a2d31;
+      --primary: #2563eb;
+      --accent: #059669;
+      --danger: #dc2626;
+    }
+
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: #f2f4f8;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
-      justify-content: center;
       align-items: center;
-      padding: 20px;
+      justify-content: center;
       min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
     }
 
     .container {
-      background: #fff;
+      background: var(--card);
       padding: 30px;
       border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 500px;
+      max-width: 420px;
     }
 
     h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
       text-align: center;
-      color: #333;
-      font-size: 1.8rem;
-      margin-bottom: 24px;
     }
 
-    label {
-      font-weight: 600;
-      color: #444;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    input[type="text"] {
+    input {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      margin-bottom: 20px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    .itens {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
-      font-size: 16px;
-      color: #333;
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--bg);
     }
 
-    .quantidade {
+    .quantidade-controle {
       display: flex;
-      gap: 8px;
       align-items: center;
+      gap: 10px;
     }
 
-    .quantidade button {
-      width: 32px;
-      height: 32px;
+    .quantidade-controle button {
+      background: var(--primary);
       border: none;
-      background-color: #3b82f6;
       color: white;
       font-size: 18px;
+      width: 30px;
+      height: 30px;
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.3s;
     }
 
-    .quantidade button:hover {
-      background-color: #2563eb;
+    .quantidade-controle button:hover {
+      background: #1d4ed8;
     }
 
-    .quantidade span {
+    .quantidade-controle span {
       min-width: 20px;
       text-align: center;
     }
 
-    .btn-enviar {
+    .btn {
       width: 100%;
       padding: 14px;
-      background-color: #3b82f6;
-      color: white;
-      font-size: 1rem;
+      font-size: 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
+      margin-top: 16px;
       transition: background 0.3s;
-      margin-top: 20px;
+    }
+
+    .btn-enviar {
+      background: var(--primary);
+      color: white;
     }
 
     .btn-enviar:hover {
-      background-color: #2563eb;
+      background: #2563eb;
     }
 
-    .btn-cozinha {
-      width: 100%;
-      padding: 12px;
-      background-color: #10b981;
+    .btn-ir {
+      background: var(--accent);
       color: white;
-      font-size: 1rem;
+      margin-top: 12px;
+    }
+
+    .btn-ir:hover {
+      background: #059669;
+    }
+
+    /* Botão de tema no topo direito */
+    .tema-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 999;
+      background-color: var(--primary);
+      color: white;
       border: none;
-      border-radius: 8px;
-      margin-top: 16px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .mensagem-confirmacao {
@@ -124,7 +160,7 @@
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: #10b981;
+      background-color: var(--accent);
       color: white;
       padding: 12px 24px;
       border-radius: 8px;
@@ -139,117 +175,128 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .quantidade {
-        margin-top: 6px;
-      }
-    }
   </style>
 </head>
 <body>
+  <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
   <div class="container">
     <h1>Fazer Pedido</h1>
-    <label for="nome">Seu nome:</label>
     <input type="text" id="nome" placeholder="Digite seu nome" />
 
-    <div class="item">
-      <span>Pão com manteiga</span>
-      <div class="quantidade">
-        <button onclick="alterarQuantidade('paoComManteiga', -1)">-</button>
-        <span id="qtd-paoComManteiga">0</span>
-        <button onclick="alterarQuantidade('paoComManteiga', 1)">+</button>
-      </div>
-    </div>
+    <div class="itens" id="lista-itens"></div>
 
-    <div class="item">
-      <span>Pão com ovo</span>
-      <div class="quantidade">
-        <button onclick="alterarQuantidade('paoComOvo', -1)">-</button>
-        <span id="qtd-paoComOvo">0</span>
-        <button onclick="alterarQuantidade('paoComOvo', 1)">+</button>
-      </div>
-    </div>
-
-    <div class="item">
-      <span>Pão na chapa</span>
-      <div class="quantidade">
-        <button onclick="alterarQuantidade('paoNaChapa', -1)">-</button>
-        <span id="qtd-paoNaChapa">0</span>
-        <button onclick="alterarQuantidade('paoNaChapa', 1)">+</button>
-      </div>
-    </div>
-
-    <div class="item">
-      <span>Misto quente</span>
-      <div class="quantidade">
-        <button onclick="alterarQuantidade('mistoQuente', -1)">-</button>
-        <span id="qtd-mistoQuente">0</span>
-        <button onclick="alterarQuantidade('mistoQuente', 1)">+</button>
-      </div>
-    </div>
-
-    <button class="btn-enviar" onclick="enviarPedido()">Enviar Pedido</button>
-    <a href="cozinha.html"><button class="btn-cozinha">Ir para a Cozinha</button></a>
+    <button class="btn btn-enviar" onclick="enviarPedido()">Enviar Pedido</button>
+    <a href="cozinha.html"><button class="btn btn-ir">Ir para a Cozinha</button></a>
   </div>
 
   <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
   <script>
-    const quantidades = {
-      paoComManteiga: 0,
-      paoComOvo: 0,
-      paoNaChapa: 0,
-      mistoQuente: 0,
+    const firebaseConfig = {
+      apiKey: "AIzaSyC1i2QTlx6bEWRpU0qoTwyhe9SCJLx07gs",
+      authDomain: "envio-e-recebimento-de-pedidos.firebaseapp.com",
+      databaseURL: "https://envio-e-recebimento-de-pedidos-default-rtdb.firebaseio.com",
+      projectId: "envio-e-recebimento-de-pedidos",
+      storageBucket: "envio-e-recebimento-de-pedidos.firebasestorage.app",
+      messagingSenderId: "985808864703",
+      appId: "1:985808864703:web:60f102b6fac9e402480d0a",
+      measurementId: "G-9D5QYDXPVH"
     };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    function alterarQuantidade(item, valor) {
-      quantidades[item] = Math.max(0, quantidades[item] + valor);
-      document.getElementById(`qtd-${item}`).innerText = quantidades[item];
+    // Verificar conexão
+    db.ref('.info/connected').on('value', (snap) => {
+      console.log('Conectado ao Firebase:', snap.val());
+    });
+
+    const itens = ["Misto Quente", "Pão na chapa", "Pão com manteiga", "Pão com ovo"];
+    const listaItens = document.getElementById('lista-itens');
+    const quantidades = {};
+
+    itens.forEach(item => {
+      quantidades[item] = 0;
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <span>${item}</span>
+        <div class="quantidade-controle">
+          <button onclick="mudarQuantidade('${item}', -1)">-</button>
+          <span id="qtd-${item}">0</span>
+          <button onclick="mudarQuantidade('${item}', 1)">+</button>
+        </div>
+      `;
+      listaItens.appendChild(div);
+    });
+
+    function mudarQuantidade(item, delta) {
+      quantidades[item] = Math.max(0, quantidades[item] + delta);
+      document.getElementById(`qtd-${item}`).textContent = quantidades[item];
     }
 
     function enviarPedido() {
-      const nome = document.getElementById('nome').value.trim();
+      const nome = document.getElementById("nome").value.trim();
       if (!nome) {
-        alert('Por favor, digite seu nome.');
+        alert("Digite seu nome.");
         return;
       }
 
-      const algumItemSelecionado = Object.values(quantidades).some(qtd => qtd > 0);
-      if (!algumItemSelecionado) {
-        alert('Selecione ao menos um item.');
+      const itensSelecionados = {};
+      for (let item in quantidades) {
+        if (quantidades[item] > 0) {
+          itensSelecionados[item] = quantidades[item];
+        }
+      }
+
+      if (Object.keys(itensSelecionados).length === 0) {
+        alert("Selecione pelo menos um item.");
         return;
       }
 
       const pedido = {
         nome,
-        quantidades: { ...quantidades },
-        horario: new Date().toLocaleTimeString()
+        horario: new Date().toLocaleTimeString(),
+        itens: itensSelecionados,
+        finalizado: false
       };
 
-      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-      pedidos.push(pedido);
-      localStorage.setItem('pedidos', JSON.stringify(pedidos));
+      db.ref("pedidos").push(pedido)
+        .then(() => {
+          // Confirmação
+          const confirmacao = document.getElementById("confirmacao");
+          confirmacao.classList.add("mostrar");
+          setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
 
-      const confirmacao = document.getElementById('confirmacao');
-      confirmacao.classList.add('mostrar');
-      setTimeout(() => {
-        confirmacao.classList.remove('mostrar');
-      }, 3000);
+          // Limpar formulário
+          document.getElementById("nome").value = "";
+          for (let item in quantidades) {
+            quantidades[item] = 0;
+            document.getElementById(`qtd-${item}`).textContent = "0";
+          }
+        })
+        .catch(error => {
+          console.error("Erro ao enviar pedido:", error);
+          alert("Erro ao enviar pedido. Tente novamente.");
+        });
+    }
 
-      document.getElementById('nome').value = '';
-      for (let item in quantidades) {
-        quantidades[item] = 0;
-        document.getElementById(`qtd-${item}`).innerText = '0';
+    function alternarTema() {
+      document.body.classList.toggle("dark");
+      const modo = document.body.classList.contains("dark") ? "dark" : "light";
+      localStorage.setItem("tema", modo);
+      document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+    }
+
+    window.onload = () => {
+      const temaSalvo = localStorage.getItem("tema");
+      if (temaSalvo === "dark") {
+        document.body.classList.add("dark");
+        document.querySelector(".tema-btn").textContent = "☀️";
       }
     }
   </script>
