@@ -260,6 +260,10 @@
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 </head>
 <body>
   <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
@@ -292,39 +296,44 @@
 
   <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
   <script>
+    // Configuração do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyC1i2QTlx6bEWRpU0qoTwyhe9SCJLx07gs",
-      authDomain: "envio-e-recebimento-de-pedidos.firebaseapp.com",
-      databaseURL: "https://envio-e-recebimento-de-pedidos-default-rtdb.firebaseio.com",
-      projectId: "envio-e-recebimento-de-pedidos",
-      storageBucket: "envio-e-recebimento-de-pedidos.firebasestorage.app",
-      messagingSenderId: "985808864703",
-      appId: "1:985808864703:web:60f102b6fac9e402480d0a",
-      measurementId: "G-9D5QYDXPVH"
+      apiKey: "AIzaSyChPsVAmwrgXgyHA72_yUoZYBxiTvaFThA",
+      authDomain: "cafe-da-terezinha.firebaseapp.com",
+      databaseURL: "https://cafe-da-terezinha-default-rtdb.firebaseio.com",
+      projectId: "cafe-da-terezinha",
+      storageBucket: "cafe-da-terezinha.firebasestorage.app",
+      messagingSenderId: "841859662062",
+      appId: "1:841859662062:web:c12f2fa4a22775e16bb3ff",
+      measurementId: "G-Q891NGK1YB"
     };
-    
+
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+    const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     // Verificar conexão
     db.ref('.info/connected').on('value', (snap) => {
-      console.log('Conectado ao Firebase:', snap.val());
+      if (snap.val() === true) {
+        console.log('Conectado ao Firebase');
+      } else {
+        console.log('Não conectado ao Firebase');
+      }
     });
 
+    // Dados dos itens do menu
     const itens = [
       "Misto Quente", 
       "Pão na chapa", 
       "Pão com manteiga", 
       "Pão com ovo",
     ];
+    
     const listaItens = document.getElementById('lista-itens');
     const quantidades = {};
 
+    // Inicializa os itens do menu
     itens.forEach(item => {
       quantidades[item] = 0;
       const div = document.createElement("div");
@@ -340,11 +349,13 @@
       listaItens.appendChild(div);
     });
 
+    // Controla a quantidade de cada item
     function mudarQuantidade(item, delta) {
       quantidades[item] = Math.max(0, quantidades[item] + delta);
       document.getElementById(`qtd-${item}`).textContent = quantidades[item];
     }
 
+    // Envia o pedido para o Firebase
     function enviarPedido() {
       const nome = document.getElementById("nome").value.trim();
       if (!nome) {
@@ -371,14 +382,15 @@
         finalizado: false
       };
 
+      // Envia para o Firebase Realtime Database
       db.ref("pedidos").push(pedido)
         .then(() => {
-          // Confirmação
+          // Mostra confirmação
           const confirmacao = document.getElementById("confirmacao");
           confirmacao.classList.add("mostrar");
           setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
 
-          // Limpar formulário
+          // Limpa o formulário
           document.getElementById("nome").value = "";
           for (let item in quantidades) {
             quantidades[item] = 0;
@@ -391,6 +403,7 @@
         });
     }
 
+    // Alterna entre tema claro e escuro
     function alternarTema() {
       document.body.classList.toggle("dark");
       const modo = document.body.classList.contains("dark") ? "dark" : "light";
@@ -398,6 +411,7 @@
       document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
     }
 
+    // Carrega o tema salvo ao iniciar a página
     window.onload = () => {
       const temaSalvo = localStorage.getItem("tema");
       if (temaSalvo === "dark") {
