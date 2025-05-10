@@ -4,26 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAFÉ DA TEREZINHA - CARDÁPIO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-    :root {
-            --bg: #f0f8ff; /* AliceBlue */
-            --text: #4682B4; /* SteelBlue */
+        :root {
+            /* Cores vibrantes - Modo Claro */
+            --bg: #e3f2fd; /* Azul claro intenso */
+            --text: #0d47a1; /* Azul escuro rico */
             --card: #ffffff;
-            --primary: #00BFFF; /* DeepSkyBlue */
-            --accent: #87CEFA; /* LightSkyBlue */
-            --danger: #FF6B6B;
-            --shadow: 0 4px 12px rgba(70, 130, 180, 0.1);
+            --primary: #1565c0; /* Azul forte */
+            --accent: #2196f3; /* Azul vibrante */
+            --danger: #f44336; /* Vermelho vivo */
+            --success: #4caf50; /* Verde para subtotal */
+            --shadow: 0 4px 16px rgba(21, 101, 192, 0.15);
         }
 
         body.dark {
-            --bg: #1a2838;
-            --text: #ADD8E6; /* LightBlue */
-            --card: #2a3a4a;
-            --primary: #00BFFF;
-            --accent: #87CEFA;
-            --danger: #FF6B6B;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            /* Cores vibrantes - Modo Escuro */
+            --bg: #0d1b2a; /* Azul quase preto */
+            --text: #bbdefb; /* Azul claro suave */
+            --card: #1b263b; /* Azul escuro */
+            --primary: #1976d2; /* Azul brilhante */
+            --accent: #64b5f6; /* Azul claro */
+            --danger: #ef5350; /* Vermelho vibrante */
+            --success: #66bb6a; /* Verde mais claro */
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -36,174 +40,221 @@
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
-            padding: 10px;
+            padding: 20px;
             min-height: 100vh;
-            transition: background 0.3s, color 0.3s;
+            transition: all 0.3s ease;
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
-            padding: 5px;
+            padding: 10px;
         }
 
         h2 {
             color: var(--primary);
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             text-align: center;
-            margin: 10px 0;
-            padding-bottom: 5px;
-            border-bottom: 2px solid var(--primary);
+            margin: 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid var(--primary);
         }
 
         .nav-buttons {
             display: flex;
-            justify-content: space-around;
-            margin: 10px 0;
+            justify-content: center;
+            margin: 15px 0;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 8px;
         }
 
         .nav-btn {
-            padding: 8px 12px;
+            padding: 10px 15px;
             background: var(--primary);
             color: white;
-            border-radius: 6px;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 600;
             text-align: center;
             flex: 1;
-            min-width: 100px;
+            min-width: 110px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .nav-btn.active {
             background: var(--accent);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .categoria-section {
-            margin: 15px 0;
+            margin: 20px 0;
             background: var(--card);
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 12px;
+            padding: 15px;
             box-shadow: var(--shadow);
         }
 
         .categoria-section h3 {
             color: var(--primary);
-            font-size: 1.1rem;
-            margin-bottom: 8px;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
 
         .cardapio-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
+            font-size: 0.95rem;
+            margin-top: 10px;
         }
 
         .cardapio-table th {
             background: var(--primary);
             color: white;
-            padding: 6px 3px;
+            padding: 10px 5px;
             text-align: center;
+            font-weight: 600;
         }
 
         .cardapio-table td {
-            padding: 6px 3px;
+            padding: 10px 5px;
             border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-weight: 500;
         }
 
         .quantidade-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
         }
 
         .quantidade-btn {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border: none;
             background: var(--primary);
             color: white;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quantidade-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
         }
 
         .quantidade {
-            width: 30px;
+            width: 36px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 1rem;
         }
 
         .subtotal {
             text-align: center;
-            font-weight: bold;
-            font-size: 0.8rem;
+            font-weight: 700;
+            font-size: 0.95rem;
         }
 
         .subtotal-verde {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent);
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--success);
+            border-radius: 4px;
         }
 
         .comanda {
             background: var(--card);
-            border-radius: 10px;
-            padding: 12px;
-            margin: 15px 0;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
             box-shadow: var(--shadow);
         }
 
         .comanda h3 {
             color: var(--primary);
-            font-size: 1.1rem;
-            margin-bottom: 8px;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .comanda-lista {
             list-style: none;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .comanda-lista li {
-            padding: 5px 0;
-            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.15);
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        .comanda-lista li span:first-child {
+            color: var(--primary);
+            font-weight: 600;
+            flex: 2;
+        }
+
+        .comanda-lista li span:last-child {
+            color: var(--accent);
+            font-weight: 700;
+            text-align: right;
+            flex: 1;
         }
 
         .total {
-            font-size: 1.2rem;
-            font-weight: bold;
+            font-size: 1.5rem;
+            font-weight: 700;
             color: var(--primary);
             text-align: center;
-            margin: 15px 0;
+            margin: 25px 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 5px;
+            gap: 10px;
         }
 
         .action-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 15px;
+            margin: 20px 0;
         }
 
         .btn {
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .btn-limpar {
@@ -217,31 +268,74 @@
             text-decoration: none;
         }
 
-        /* Ajustes para telas muito pequenas */
-        @media (max-width: 360px) {
+        /* Botão de tema fixo */
+        .tema-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tema-btn:hover {
+            transform: scale(1.1) rotate(15deg);
+            background-color: var(--accent);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+            
             .cardapio-table {
-                font-size: 0.7rem;
+                font-size: 0.85rem;
             }
             
             .quantidade-btn {
-                width: 20px;
-                height: 20px;
-                font-size: 0.7rem;
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
             }
             
             .quantidade {
-                width: 25px;
+                width: 30px;
+                font-size: 0.9rem;
             }
             
             .nav-btn {
-                font-size: 0.7rem;
-                padding: 6px 8px;
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .tema-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
             }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
+    
     <div class="container">
         <h2>CAFÉ DA TEREZINHA</h2>
         
@@ -309,8 +403,6 @@
             ],
         };
 
-
-        
         function atualizarTotal() {
             let total = 0;
             let comandaLista = document.getElementById("comanda-lista");
@@ -329,8 +421,11 @@
                     subtotalElement.classList.add("subtotal-verde");
                     const fichas = calcularFichas(subtotal);
                     const li = document.createElement("li");
-                    // Adiciona a quantidade antes das fichas
-                    li.innerHTML = `<span>${span.dataset.nome} (${quantidade}x)</span> <span>${fichas}</span>`;
+                    // Mostra o nome, quantidade e fichas
+                    li.innerHTML = `
+                        <span>${span.dataset.nome} <strong>(${quantidade}x)</strong></span>
+                        <span>${fichas}</span>
+                    `;
                     comandaLista.appendChild(li);
                 } else {
                     subtotalElement.classList.remove("subtotal-verde");
@@ -398,7 +493,7 @@
                     
                     tr.innerHTML = `
                         <td>${item.nome}</td>
-                        <td>${item.preco.toFixed(2)}</td>
+                        <td>R$ ${item.preco.toFixed(2)}</td>
                         <td>
                             <div class="quantidade-container">
                                 <button class="quantidade-btn" onclick="alterarQuantidade('quantidade-${id}', -1)">-</button>
@@ -428,7 +523,22 @@
             document.getElementById("total").textContent = "0.00";
         }
 
-        window.onload = carregarItens;
+        function alternarTema() {
+            document.body.classList.toggle("dark");
+            const modo = document.body.classList.contains("dark") ? "dark" : "light";
+            localStorage.setItem("tema", modo);
+            document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+        }
+
+        // Verificar tema ao carregar a página
+        window.onload = function() {
+            const temaSalvo = localStorage.getItem("tema");
+            if (temaSalvo === "dark") {
+                document.body.classList.add("dark");
+                document.querySelector(".tema-btn").textContent = "☀️";
+            }
+            carregarItens();
+        };
     </script>
 </body>
 </html>
