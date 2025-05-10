@@ -1,0 +1,29 @@
+{
+    "rules": {
+      "pedidos": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['nome', 'horario', 'itens', 'finalizado', 'timestamp'])",
+        "$pedido": {
+          "nome": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "horario": {
+            ".validate": "newData.isString()"
+          },
+          "itens": {
+            ".validate": "newData.hasChildren()",
+            "$item": {
+              ".validate": "newData.isNumber() && newData.val() > 0"
+            }
+          },
+          "finalizado": {
+            ".validate": "newData.isBoolean()"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber()"
+          }
+        }
+      }
+    }
+  }

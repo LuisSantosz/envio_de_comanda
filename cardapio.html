@@ -426,6 +426,30 @@
         }
 
         window.onload = carregarItens;
+
+         // Adicione no final do script:
+         if (typeof firebase !== 'undefined') {
+            firebase.initializeApp({
+                apiKey: "AIzaSyC1i2QTlx6bEWRpU0qoTwyhe9SCJLx07gs",
+                authDomain: "envio-e-recebimento-de-pedidos.firebaseapp.com",
+                databaseURL: "https://envio-e-recebimento-de-pedidos-default-rtdb.firebaseio.com",
+                projectId: "envio-e-recebimento-de-pedidos",
+                storageBucket: "envio-e-recebimento-de-pedidos.appspot.com",
+                messagingSenderId: "985808864703",
+                appId: "1:985808864703:web:60f102b6fac9e402480d0a",
+                measurementId: "G-9D5QYDXPVH"
+            });
+            
+            const db = firebase.database();
+            db.ref('.info/connected').on('value', (snap) => {
+                const statusElement = document.getElementById('status-conexao');
+                if (snap.val()) {
+                    statusElement.style.display = 'none';
+                } else {
+                    statusElement.style.display = 'block';
+                }
+            });
+        }
     </script>
 </body>
 </html>
