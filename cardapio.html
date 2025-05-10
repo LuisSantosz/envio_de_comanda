@@ -6,24 +6,24 @@
     <title>CAFÉ DA TEREZINHA - CARDÁPIO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #f2f4f8;
-            --text: #333;
-            --card: #fff;
-            --primary: #3b82f6;
-            --accent: #10b981;
-            --danger: #ef4444;
-            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    :root {
+            --bg: #f0f8ff; /* AliceBlue */
+            --text: #4682B4; /* SteelBlue */
+            --card: #ffffff;
+            --primary: #00BFFF; /* DeepSkyBlue */
+            --accent: #87CEFA; /* LightSkyBlue */
+            --danger: #FF6B6B;
+            --shadow: 0 4px 12px rgba(70, 130, 180, 0.1);
         }
 
         body.dark {
-            --bg: #1a1c1f;
-            --text: #f5f5f5;
-            --card: #2a2d31;
-            --primary: #2563eb;
-            --accent: #059669;
-            --danger: #dc2626;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --bg: #1a2838;
+            --text: #ADD8E6; /* LightBlue */
+            --card: #2a3a4a;
+            --primary: #00BFFF;
+            --accent: #87CEFA;
+            --danger: #FF6B6B;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -309,6 +309,8 @@
             ],
         };
 
+
+        
         function atualizarTotal() {
             let total = 0;
             let comandaLista = document.getElementById("comanda-lista");
@@ -327,7 +329,8 @@
                     subtotalElement.classList.add("subtotal-verde");
                     const fichas = calcularFichas(subtotal);
                     const li = document.createElement("li");
-                    li.innerHTML = `<span>${span.dataset.nome}</span> <span>${fichas}</span>`;
+                    // Adiciona a quantidade antes das fichas
+                    li.innerHTML = `<span>${span.dataset.nome} (${quantidade}x)</span> <span>${fichas}</span>`;
                     comandaLista.appendChild(li);
                 } else {
                     subtotalElement.classList.remove("subtotal-verde");
