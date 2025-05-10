@@ -6,24 +6,24 @@
   <title>CAFÉ DA TEREZINHA - PEDIDOS RECEBIDOS</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f0f2f5;
-      --text: #333;
-      --card: #fff;
-      --primary: #3b82f6;
-      --accent: #10b981;
-      --danger: #ef4444;
-      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+     :root {
+      --bg: #f0f8ff; /* AliceBlue */
+      --text: #4682B4; /* SteelBlue */
+      --card: #ffffff;
+      --primary: #00BFFF; /* DeepSkyBlue */
+      --accent: #87CEFA; /* LightSkyBlue */
+      --danger: #FF6B6B;
+      --shadow: 0 4px 12px rgba(70, 130, 180, 0.1);
     }
 
     body.dark {
-      --bg: #1a1c1f;
-      --text: #f5f5f5;
-      --card: #2a2d31;
-      --primary: #2563eb;
-      --accent: #059669;
-      --danger: #dc2626;
-      --shadow: 0 4px 12px rgba(0,0,0,0.3);
+      --bg: #1a2838;
+      --text: #ADD8E6; /* LightBlue */
+      --card: #2a3a4a;
+      --primary: #00BFFF;
+      --accent: #87CEFA;
+      --danger: #FF6B6B;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -222,10 +222,6 @@
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 </head>
 <body>
   <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
@@ -251,110 +247,71 @@
       <button class="btn-limpar-all" onclick="limparFinalizados()">
         <i class="fas fa-trash-alt"></i> Limpar Pedidos Finalizados
       </button>
-      <a href="index.html" class="btn-voltar">
-        <i class="fas fa-arrow-left"></i> Voltar ao Pedido
-      </a>
+      
     </div>
   </div>
 
   <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyChPsVAmwrgXgyHA72_yUoZYBxiTvaFThA",
-      authDomain: "cafe-da-terezinha.firebaseapp.com",
-      databaseURL: "https://cafe-da-terezinha-default-rtdb.firebaseio.com",
-      projectId: "cafe-da-terezinha",
-      storageBucket: "cafe-da-terezinha.firebasestorage.app",
-      messagingSenderId: "841859662062",
-      appId: "1:841859662062:web:c12f2fa4a22775e16bb3ff",
-      measurementId: "G-Q891NGK1YB"
-    };
+    // Função para formatar os itens do pedido
+    function formatarItens(itens) {
+      return Object.entries(itens).map(([item, qtd]) => `${item}: ${qtd}`).join(', ');
+    }
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const listaPedidos = document.getElementById('lista-pedidos');
-
-    // Função para carregar pedidos do Firebase
+    // Função para carregar pedidos do localStorage
     function carregarPedidos() {
-      listaPedidos.innerHTML = '<p style="text-align:center">Carregando pedidos...</p>';
-      db.ref('pedidos').on('value', 
-        (snapshot) => {
-          listaPedidos.innerHTML = '';
-          const pedidos = snapshot.val() || {};
-          
-          if (Object.keys(pedidos).length === 0) {
-            listaPedidos.innerHTML = '<p style="text-align:center">Nenhum pedido encontrado</p>';
-            return;
-          }
-          
-          for (const key in pedidos) {
-            const pedido = pedidos[key];
-            const divPedido = document.createElement('div');
-            divPedido.classList.add('pedido');
-            if (pedido.finalizado) {
-              divPedido.classList.add('finalizado');
-            }
-
-            divPedido.innerHTML = `
-              <strong><i class="fas fa-user"></i> Nome:</strong> ${pedido.nome}<br>
-              <strong><i class="fas fa-utensils"></i> Itens:</strong> ${Object.entries(pedido.itens).map(([item, qtd]) => `${item}: ${qtd}`).join(', ')}<br>
-              <strong><i class="fas fa-clock"></i> Horário:</strong> ${pedido.horario}<br>
-              ${!pedido.finalizado ? `
-                <button class="btn-finalizar" onclick="marcarComoFinalizado('${key}')">
-                  <i class="fas fa-check"></i> Marcar como Finalizado
-                </button>
-              ` : ''}
-            `;
-            listaPedidos.appendChild(divPedido);
-          }
-        },
-        (error) => {
-          console.error("Erro ao carregar pedidos:", error);
-          listaPedidos.innerHTML = '<p style="text-align:center;color:var(--danger)">Erro ao carregar pedidos. Recarregue a página.</p>';
+      const listaPedidos = document.getElementById('lista-pedidos');
+      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+      
+      listaPedidos.innerHTML = '';
+      
+      if (pedidos.length === 0) {
+        listaPedidos.innerHTML = '<p style="text-align:center">Nenhum pedido encontrado</p>';
+        return;
+      }
+      
+      pedidos.forEach((pedido) => {
+        const divPedido = document.createElement('div');
+        divPedido.classList.add('pedido');
+        if (pedido.finalizado) {
+          divPedido.classList.add('finalizado');
         }
-      );
+
+        divPedido.innerHTML = `
+          <strong><i class="fas fa-user"></i> Nome:</strong> ${pedido.nome}<br>
+          <strong><i class="fas fa-utensils"></i> Itens:</strong> ${formatarItens(pedido.itens)}<br>
+          <strong><i class="fas fa-clock"></i> Horário:</strong> ${pedido.horario}<br>
+          ${!pedido.finalizado ? `
+            <button class="btn-finalizar" onclick="marcarComoFinalizado(${pedido.id})">
+              <i class="fas fa-check"></i> Marcar como Finalizado
+            </button>
+          ` : ''}
+        `;
+        listaPedidos.appendChild(divPedido);
+      });
     }
 
     // Função para marcar pedido como finalizado
     function marcarComoFinalizado(id) {
-      const pedidoRef = db.ref(`pedidos/${id}`);
-      pedidoRef.update({ finalizado: true })
-        .then(() => console.log('Pedido marcado como finalizado'))
-        .catch(error => console.error('Erro ao finalizar pedido:', error));
+      let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+      pedidos = pedidos.map(pedido => {
+        if (pedido.id === id) {
+          return {...pedido, finalizado: true};
+        }
+        return pedido;
+      });
+      localStorage.setItem('pedidos', JSON.stringify(pedidos));
+      carregarPedidos();
     }
 
     // Função para limpar todos os pedidos finalizados
     function limparFinalizados() {
-      if (!confirm('Tem certeza que deseja limpar todos os pedidos finalizados?')) {
-        return;
+      if (confirm('Tem certeza que deseja limpar todos os pedidos finalizados?')) {
+        let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+        pedidos = pedidos.filter(pedido => !pedido.finalizado);
+        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        carregarPedidos();
       }
-      
-      db.ref('pedidos').once('value', (snapshot) => {
-        const pedidos = snapshot.val() || {};
-        const updates = {};
-        
-        for (const key in pedidos) {
-          if (pedidos[key].finalizado) {
-            updates[key] = null; // Marca para remoção
-          }
-        }
-        
-        db.ref('pedidos').update(updates)
-          .then(() => console.log('Pedidos finalizados removidos'))
-          .catch(error => console.error('Erro ao remover pedidos:', error));
-      });
     }
-
-    // Notificação sonora para novos pedidos
-    db.ref('pedidos').orderByChild('finalizado').equalTo(false).on('child_added', (snapshot) => {
-      // Verifica se é um novo pedido (não apenas ao carregar a página)
-      if (snapshot.val().horario === new Date().toLocaleTimeString()) {
-        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
-        audio.play().catch(e => console.log("Não foi possível reproduzir som:", e));
-      }
-    });
 
     // Alternar tema
     function alternarTema() {

@@ -1,89 +1,389 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CAFÉ DA TEREZINHA - ENVIO DE PEDIDOS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+:root {
+      --bg: #f0f8ff; /* AliceBlue - fundo claro */
+      --text: #4682B4; /* SteelBlue - texto principal */
+      --card: #ffffff; /* Branco - cartões */
+      --primary: #00BFFF; /* DeepSkyBlue - primária */
+      --accent: #87CEFA; /* LightSkyBlue - destaque */
+      --danger: #FF6B6B; /* Cor de alerta mantida */
+      --shadow: 0 4px 12px rgba(70, 130, 180, 0.1); /* SteelBlue com opacidade */
+    }
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/11.7.1/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/11.7.1/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/11.7.1/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    body.dark {
+      --bg: #1a2838; /* Azul escuro personalizado */
+      --text: #ADD8E6; /* LightBlue - texto claro */
+      --card: #2a3a4a; /* Azul mais escuro para cartões */
+      --primary: #00BFFF; /* DeepSkyBlue mantido */
+      --accent: #87CEFA; /* LightSkyBlue mantido */
+      --danger: #FF6B6B;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      background: var(--card);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+      color: var(--primary);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .itens {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      border-radius: 10px;
+      background: var(--bg);
+      transition: all 0.3s;
+    }
+
+    .item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .quantidade-controle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quantidade-controle button {
+      background: var(--primary);
+      border: none;
+      color: white;
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quantidade-controle button:hover {
+      background: #1d4ed8;
+    }
+
+    .quantidade-controle span {
+      min-width: 20px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all 0.3s;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-enviar {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-enviar:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+
+  .tema-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000; /* Aumentei o z-index para garantir que fique acima de tudo */
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tema-btn:hover {
+      transform: scale(1.1) rotate(30deg);
+    }
+
+    .mensagem-confirmacao {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--accent);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 9999;
+    }
+
+    .mensagem-confirmacao.mostrar {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 12px 24px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-btn.active {
+      background-color: var(--accent);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
       }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+      
+      .nav-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .nav-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
+  
+  <div class="container">
+    <div class="nav-buttons">
+      <a href="index.html" class="nav-btn active">
+        <i class="fas fa-paper-plane"></i> Envio de Pedidos
+      </a>
+      <a href="cozinha.html" class="nav-btn">
+        <i class="fas fa-clipboard-list"></i> Pedidos Recebidos
+      </a>
+      <a href="cardapio.html" class="nav-btn">
+        <i class="fas fa-utensils"></i> Cardápio
+      </a>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    
+    <h1><i class="fas fa-paper-plane"></i> ENVIAR PEDIDO</h1>
+    
+    <h2>Digite seu nome</h2>
+    <input type="text" id="nome" placeholder="Seu nome aqui" />
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+    <div class="itens" id="lista-itens"></div>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+    <button class="btn btn-enviar" onclick="enviarPedido()">
+      <i class="fas fa-paper-plane"></i> Enviar Pedido
+    </button>
+  </div>
+
+  <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
+
+  <script>
+    // Armazenamento local de pedidos
+    let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+    
+    const itens = [
+      "Misto Quente", 
+      "Pão na chapa", 
+      "Pão com manteiga", 
+      "Pão com ovo"
+    ];
+    const listaItens = document.getElementById('lista-itens');
+    const quantidades = {};
+
+    // Inicializar quantidades
+    itens.forEach(item => {
+      quantidades[item] = 0;
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <span>${item}</span>
+        <div class="quantidade-controle">
+          <button onclick="mudarQuantidade('${item}', -1)">-</button>
+          <span id="qtd-${item}">0</span>
+          <button onclick="mudarQuantidade('${item}', 1)">+</button>
+        </div>
+      `;
+      listaItens.appendChild(div);
+    });
+
+    function mudarQuantidade(item, delta) {
+      quantidades[item] = Math.max(0, quantidades[item] + delta);
+      document.getElementById(`qtd-${item}`).textContent = quantidades[item];
+    }
+
+    function enviarPedido() {
+      const nome = document.getElementById("nome").value.trim();
+      if (!nome) {
+        alert("Digite seu nome.");
+        return;
+      }
+
+      // Filtrar apenas itens com quantidade > 0
+      const itensSelecionados = {};
+      for (let item in quantidades) {
+        if (quantidades[item] > 0) {
+          itensSelecionados[item] = quantidades[item];
+        }
+      }
+
+      if (Object.keys(itensSelecionados).length === 0) {
+        alert("Selecione pelo menos um item.");
+        return;
+      }
+
+      const novoPedido = {
+        nome: nome,
+        horario: new Date().toLocaleTimeString(),
+        itens: itensSelecionados,
+        finalizado: false,
+        id: Date.now() // ID único para cada pedido
+      };
+
+      // Adicionar ao array de pedidos
+      pedidos.push(novoPedido);
+      
+      // Salvar no localStorage
+      localStorage.setItem('pedidos', JSON.stringify(pedidos));
+
+      // Mostrar confirmação
+      const confirmacao = document.getElementById("confirmacao");
+      confirmacao.classList.add("mostrar");
+      setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
+
+      // Limpar formulário
+      document.getElementById("nome").value = "";
+      for (let item in quantidades) {
+        quantidades[item] = 0;
+        document.getElementById(`qtd-${item}`).textContent = "0";
+      }
+    }
+
+    function alternarTema() {
+      document.body.classList.toggle("dark");
+      const modo = document.body.classList.contains("dark") ? "dark" : "light";
+      localStorage.setItem("tema", modo);
+      document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+    }
+
+    // Corrigir comportamento dos links
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        if (this.getAttribute('href').endsWith('.html')) {
+          e.preventDefault();
+          window.location.href = this.getAttribute('href');
         }
       });
-    </script>
-  </body>
+    });
+
+    window.onload = () => {
+      const temaSalvo = localStorage.getItem("tema");
+      if (temaSalvo === "dark") {
+        document.body.classList.add("dark");
+        document.querySelector(".tema-btn").textContent = "☀️";
+      }
+    }
+  </script>
+</body>
 </html>
