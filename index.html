@@ -48,7 +48,6 @@
       width: 100%;
       max-width: 500px;
       margin: 0 auto;
-      position: relative;
     }
 
     h1 {
@@ -244,18 +243,6 @@
       background-color: var(--accent);
     }
 
-    .status-conexao {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: var(--danger);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      z-index: 1000;
-      display: none;
-    }
-
     @media (max-width: 480px) {
       .container {
         padding: 20px;
@@ -276,9 +263,6 @@
 </head>
 <body>
   <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
-  <div id="status-conexao" class="status-conexao">
-    <i class="fas fa-wifi-slash"></i> Sem conexão com o servidor
-  </div>
   
   <div class="container">
     <div class="nav-buttons">
@@ -312,129 +296,109 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
   <script>
-    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyC1i2QTlx6bEWRpU0qoTwyhe9SCJLx07gs",
       authDomain: "envio-e-recebimento-de-pedidos.firebaseapp.com",
       databaseURL: "https://envio-e-recebimento-de-pedidos-default-rtdb.firebaseio.com",
       projectId: "envio-e-recebimento-de-pedidos",
-      storageBucket: "envio-e-recebimento-de-pedidos.appspot.com",
+      storageBucket: "envio-e-recebimento-de-pedidos.firebasestorage.app",
       messagingSenderId: "985808864703",
       appId: "1:985808864703:web:60f102b6fac9e402480d0a",
       measurementId: "G-9D5QYDXPVH"
     };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // Inicialização do Firebase
-    try {
-      if (firebase.apps.length) {
-        firebase.app().delete().then(() => {
-          console.log('Firebase reiniciado');
-          firebase.initializeApp(firebaseConfig);
-          initApp();
-        });
-      } else {
-        firebase.initializeApp(firebaseConfig);
-        initApp();
-      }
-    } catch (e) {
-      console.error('Erro ao inicializar Firebase:', e);
-      alert('Erro ao conectar com o servidor. Recarregue a página.');
+    // Verificar conexão
+    db.ref('.info/connected').on('value', (snap) => {
+      console.log('Conectado ao Firebase:', snap.val());
+    });
+
+    const itens = [
+      "Misto Quente", 
+      "Pão na chapa", 
+      "Pão com manteiga", 
+      "Pão com ovo",
+    ];
+    const listaItens = document.getElementById('lista-itens');
+    const quantidades = {};
+
+    itens.forEach(item => {
+      quantidades[item] = 0;
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <span>${item}</span>
+        <div class="quantidade-controle">
+          <button onclick="mudarQuantidade('${item}', -1)">-</button>
+          <span id="qtd-${item}">0</span>
+          <button onclick="mudarQuantidade('${item}', 1)">+</button>
+        </div>
+      `;
+      listaItens.appendChild(div);
+    });
+
+    function mudarQuantidade(item, delta) {
+      quantidades[item] = Math.max(0, quantidades[item] + delta);
+      document.getElementById(`qtd-${item}`).textContent = quantidades[item];
     }
 
-    function initApp() {
-      const db = firebase.database();
-      const itens = [
-        "Misto Quente", 
-        "Pão na chapa", 
-        "Pão com manteiga", 
-        "Pão com ovo",
-      ];
-      const listaItens = document.getElementById('lista-itens');
-      const quantidades = {};
+    function enviarPedido() {
+      const nome = document.getElementById("nome").value.trim();
+      if (!nome) {
+        alert("Digite seu nome.");
+        return;
+      }
 
-      // Monitorar conexão
-      db.ref('.info/connected').on('value', (snap) => {
-        const statusElement = document.getElementById('status-conexao');
-        if (snap.val()) {
-          statusElement.style.display = 'none';
-          console.log('Conectado ao Firebase');
-        } else {
-          statusElement.style.display = 'block';
-          console.warn('Sem conexão com o Firebase');
+      const itensSelecionados = {};
+      for (let item in quantidades) {
+        if (quantidades[item] > 0) {
+          itensSelecionados[item] = quantidades[item];
         }
-      });
+      }
 
-      // Inicializar itens
-      itens.forEach(item => {
-        quantidades[item] = 0;
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <span>${item}</span>
-          <div class="quantidade-controle">
-            <button onclick="mudarQuantidade('${item}', -1)">-</button>
-            <span id="qtd-${item}">0</span>
-            <button onclick="mudarQuantidade('${item}', 1)">+</button>
-          </div>
-        `;
-        listaItens.appendChild(div);
-      });
+      if (Object.keys(itensSelecionados).length === 0) {
+        alert("Selecione pelo menos um item.");
+        return;
+      }
 
-      // Funções globais
-      window.mudarQuantidade = function(item, delta) {
-        quantidades[item] = Math.max(0, quantidades[item] + delta);
-        document.getElementById(`qtd-${item}`).textContent = quantidades[item];
+      const pedido = {
+        nome,
+        horario: new Date().toLocaleTimeString(),
+        itens: itensSelecionados,
+        finalizado: false
       };
 
-      window.enviarPedido = function() {
-        const nome = document.getElementById('nome').value.trim();
-        if (!nome) return alert('Nome é obrigatório');
+      db.ref("pedidos").push(pedido)
+        .then(() => {
+          // Confirmação
+          const confirmacao = document.getElementById("confirmacao");
+          confirmacao.classList.add("mostrar");
+          setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
 
-        const itensSelecionados = Object.entries(quantidades)
-          .filter(([_, qtd]) => qtd > 0)
-          .reduce((obj, [item, qtd]) => ({ ...obj, [item]: qtd }), {});
+          // Limpar formulário
+          document.getElementById("nome").value = "";
+          for (let item in quantidades) {
+            quantidades[item] = 0;
+            document.getElementById(`qtd-${item}`).textContent = "0";
+          }
+        })
+        .catch(error => {
+          console.error("Erro ao enviar pedido:", error);
+          alert("Erro ao enviar pedido. Tente novamente.");
+        });
+    }
 
-        if (Object.keys(itensSelecionados).length === 0) {
-          return alert('Selecione pelo menos 1 item');
-        }
+    function alternarTema() {
+      document.body.classList.toggle("dark");
+      const modo = document.body.classList.contains("dark") ? "dark" : "light";
+      localStorage.setItem("tema", modo);
+      document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+    }
 
-        const pedidoRef = db.ref('pedidos').push();
-        const novoPedido = {
-          nome: nome,
-          horario: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-          itens: itensSelecionados,
-          finalizado: false,
-          timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        pedidoRef.set(novoPedido)
-          .then(() => {
-            console.log('Pedido enviado ID:', pedidoRef.key);
-            // Reset form
-            document.getElementById('nome').value = '';
-            Object.keys(quantidades).forEach(item => {
-              quantidades[item] = 0;
-              document.getElementById(`qtd-${item}`).textContent = '0';
-            });
-            // Feedback visual
-            const confirmacao = document.getElementById('confirmacao');
-            confirmacao.classList.add('mostrar');
-            setTimeout(() => confirmacao.classList.remove('mostrar'), 3000);
-          })
-          .catch(error => {
-            console.error('Falha ao enviar:', error);
-            alert(`Erro: ${error.message || 'Verifique o console'}`);
-          });
-      };
-
-      window.alternarTema = function() {
-        document.body.classList.toggle("dark");
-        const modo = document.body.classList.contains("dark") ? "dark" : "light";
-        localStorage.setItem("tema", modo);
-        document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
-      };
-
-      // Carregar tema salvo
+    window.onload = () => {
       const temaSalvo = localStorage.getItem("tema");
       if (temaSalvo === "dark") {
         document.body.classList.add("dark");

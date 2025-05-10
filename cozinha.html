@@ -199,18 +199,6 @@
       flex-wrap: wrap;
     }
 
-    .status-conexao {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: var(--danger);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      z-index: 1000;
-      display: none;
-    }
-
     @media (max-width: 768px) {
       .nav-buttons {
         flex-direction: column;
@@ -237,9 +225,6 @@
 </head>
 <body>
   <button class="tema-btn" onclick="alternarTema()" title="Alternar tema">🌙</button>
-  <div id="status-conexao" class="status-conexao">
-    <i class="fas fa-wifi-slash"></i> Sem conexão com o servidor
-  </div>
   
   <div class="container">
     <div class="nav-buttons">
@@ -272,153 +257,118 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
   <script>
-    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyC1i2QTlx6bEWRpU0qoTwyhe9SCJLx07gs",
       authDomain: "envio-e-recebimento-de-pedidos.firebaseapp.com",
       databaseURL: "https://envio-e-recebimento-de-pedidos-default-rtdb.firebaseio.com",
       projectId: "envio-e-recebimento-de-pedidos",
-      storageBucket: "envio-e-recebimento-de-pedidos.appspot.com",
+      storageBucket: "envio-e-recebimento-de-pedidos.firebasestorage.app",
       messagingSenderId: "985808864703",
       appId: "1:985808864703:web:60f102b6fac9e402480d0a",
       measurementId: "G-9D5QYDXPVH"
     };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // Inicialização do Firebase
-    try {
-      if (firebase.apps.length) {
-        firebase.app().delete().then(() => {
-          console.log('Firebase reiniciado');
-          firebase.initializeApp(firebaseConfig);
-          initApp();
-        });
-      } else {
-        firebase.initializeApp(firebaseConfig);
-        initApp();
-      }
-    } catch (e) {
-      console.error('Erro ao inicializar Firebase:', e);
-      document.getElementById('lista-pedidos').innerHTML = `
-        <p style="color:var(--danger);text-align:center">
-          <i class="fas fa-exclamation-triangle"></i> Erro ao conectar com o servidor
-        </p>`;
+    // Verificar conexão
+    db.ref('.info/connected').on('value', (snap) => {
+      console.log('Conectado ao Firebase:', snap.val());
+    });
+
+    const listaPedidos = document.getElementById('lista-pedidos');
+
+    // Função para carregar pedidos do Firebase
+    function carregarPedidos() {
+      listaPedidos.innerHTML = '<p style="text-align:center">Carregando pedidos...</p>';
+      db.ref('pedidos').on('value', 
+        (snapshot) => {
+          listaPedidos.innerHTML = '';
+          const pedidos = snapshot.val() || {};
+          
+          if (Object.keys(pedidos).length === 0) {
+            listaPedidos.innerHTML = '<p style="text-align:center">Nenhum pedido encontrado</p>';
+            return;
+          }
+          
+          for (const key in pedidos) {
+            const pedido = pedidos[key];
+            const divPedido = document.createElement('div');
+            divPedido.classList.add('pedido');
+            if (pedido.finalizado) {
+              divPedido.classList.add('finalizado');
+            }
+
+            divPedido.innerHTML = `
+              <strong><i class="fas fa-user"></i> Nome:</strong> ${pedido.nome}<br>
+              <strong><i class="fas fa-utensils"></i> Itens:</strong> ${Object.entries(pedido.itens).map(([item, qtd]) => `${item}: ${qtd}`).join(', ')}<br>
+              <strong><i class="fas fa-clock"></i> Horário:</strong> ${pedido.horario}<br>
+              ${!pedido.finalizado ? `
+                <button class="btn-finalizar" onclick="marcarComoFinalizado('${key}')">
+                  <i class="fas fa-check"></i> Marcar como Finalizado
+                </button>
+              ` : ''}
+            `;
+            listaPedidos.appendChild(divPedido);
+          }
+        },
+        (error) => {
+          console.error("Erro ao carregar pedidos:", error);
+          listaPedidos.innerHTML = '<p style="text-align:center;color:var(--danger)">Erro ao carregar pedidos. Recarregue a página.</p>';
+        }
+      );
     }
 
-    function initApp() {
-      const db = firebase.database();
-      const listaPedidos = document.getElementById('lista-pedidos');
+    // Função para marcar pedido como finalizado
+    function marcarComoFinalizado(id) {
+      const pedidoRef = db.ref(`pedidos/${id}`);
+      pedidoRef.update({ finalizado: true })
+        .then(() => console.log('Pedido marcado como finalizado'))
+        .catch(error => console.error('Erro ao finalizar pedido:', error));
+    }
 
-      // Monitorar conexão
-      db.ref('.info/connected').on('value', (snap) => {
-        const statusElement = document.getElementById('status-conexao');
-        if (snap.val()) {
-          statusElement.style.display = 'none';
-          console.log('Conectado ao Firebase');
-        } else {
-          statusElement.style.display = 'block';
-          console.warn('Sem conexão com o Firebase');
-        }
-      });
-
-      // Função para formatar itens
-      window.formatItens = function(itens) {
-        return Object.entries(itens)
-          .map(([item, qtd]) => `${item} (${qtd})`)
-          .join(', ');
-      };
-
-      // Carregar pedidos
-      window.carregarPedidos = function() {
-        const loadingHTML = '<p style="text-align:center"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>';
-        listaPedidos.innerHTML = loadingHTML;
-
-        db.ref('pedidos').orderByChild('timestamp').on('value', 
-          (snapshot) => {
-            if (!snapshot.exists()) {
-              listaPedidos.innerHTML = '<p style="text-align:center">Nenhum pedido encontrado</p>';
-              return;
-            }
-
-            const pedidos = [];
-            snapshot.forEach(childSnap => {
-              pedidos.push({
-                key: childSnap.key,
-                ...childSnap.val()
-              });
-            });
-
-            // Ordena do mais recente para o mais antigo
-            pedidos.sort((a, b) => b.timestamp - a.timestamp);
-
-            listaPedidos.innerHTML = '';
-            pedidos.forEach(pedido => {
-              const pedidoHTML = `
-                <div class="pedido ${pedido.finalizado ? 'finalizado' : ''}">
-                  <strong><i class="fas fa-user"></i> Nome:</strong> ${pedido.nome}<br>
-                  <strong><i class="fas fa-utensils"></i> Itens:</strong> ${formatItens(pedido.itens)}<br>
-                  <strong><i class="fas fa-clock"></i> Horário:</strong> ${pedido.horario}<br>
-                  ${!pedido.finalizado ? `
-                    <button class="btn-finalizar" onclick="marcarComoFinalizado('${pedido.key}')">
-                      <i class="fas fa-check"></i> Finalizar
-                    </button>` : ''}
-                </div>
-              `;
-              listaPedidos.innerHTML += pedidoHTML;
-            });
-          },
-          (error) => {
-            console.error("Erro Firebase:", error);
-            listaPedidos.innerHTML = `
-              <p style="color:var(--danger);text-align:center">
-                <i class="fas fa-exclamation-triangle"></i> Erro ao carregar pedidos
-              </p>`;
-          }
-        );
-      };
-
-      // Marcar como finalizado
-      window.marcarComoFinalizado = function(id) {
-        db.ref(`pedidos/${id}`).update({ finalizado: true })
-          .then(() => console.log('Pedido finalizado'))
-          .catch(error => console.error('Erro ao finalizar:', error));
-      };
-
-      // Limpar finalizados
-      window.limparFinalizados = function() {
-        if (!confirm('Tem certeza que deseja limpar todos os pedidos finalizados?')) return;
+    // Função para limpar todos os pedidos finalizados
+    function limparFinalizados() {
+      if (!confirm('Tem certeza que deseja limpar todos os pedidos finalizados?')) {
+        return;
+      }
+      
+      db.ref('pedidos').once('value', (snapshot) => {
+        const pedidos = snapshot.val() || {};
+        const updates = {};
         
-        db.ref('pedidos').once('value', (snapshot) => {
-          const updates = {};
-          snapshot.forEach(childSnap => {
-            if (childSnap.val().finalizado) {
-              updates[childSnap.key] = null;
-            }
-          });
-          
-          db.ref('pedidos').update(updates)
-            .then(() => console.log('Pedidos finalizados removidos'))
-            .catch(error => {
-              console.error('Erro ao remover:', error);
-              alert('Erro ao limpar pedidos');
-            });
-        });
-      };
+        for (const key in pedidos) {
+          if (pedidos[key].finalizado) {
+            updates[key] = null; // Marca para remoção
+          }
+        }
+        
+        db.ref('pedidos').update(updates)
+          .then(() => console.log('Pedidos finalizados removidos'))
+          .catch(error => console.error('Erro ao remover pedidos:', error));
+      });
+    }
 
-      // Alternar tema
-      window.alternarTema = function() {
-        document.body.classList.toggle("dark");
-        const modo = document.body.classList.contains("dark") ? "dark" : "light";
-        localStorage.setItem("tema", modo);
-        document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
-      };
+    // Listener para novos pedidos
+    db.ref('pedidos').orderByChild('finalizado').equalTo(false).on('child_added', (snapshot) => {
+      console.log('Novo pedido recebido:', snapshot.val());
+      // Você pode adicionar um efeito visual/sonoro aqui
+    });
 
-      // Inicializar
+    function alternarTema() {
+      document.body.classList.toggle("dark");
+      const modo = document.body.classList.contains("dark") ? "dark" : "light";
+      localStorage.setItem("tema", modo);
+      document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+    }
+
+    window.onload = () => {
       const temaSalvo = localStorage.getItem("tema");
       if (temaSalvo === "dark") {
         document.body.classList.add("dark");
         document.querySelector(".tema-btn").textContent = "☀️";
       }
-      
       carregarPedidos();
     }
   </script>
