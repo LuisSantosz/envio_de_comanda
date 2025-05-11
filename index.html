@@ -289,21 +289,19 @@
   // Configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyChPsVAmwrgXgyHA72_yUoZYBxiTvaFThA",
-    authDomain: "cafe-da-terezinha.firebaseapp.com",
-    projectId: "cafe-da-terezinha",
-    storageBucket: "cafe-da-terezinha.appspot.com",
+   authDomain: "cafe-da-santa-terezinha.firebaseapp.com",
+  projectId: "cafe-da-santa-terezinha",
+  storageBucket: "cafe-da-santa-terezinha.appspot.com",
     messagingSenderId: "841859662062",
     appId: "1:841859662062:web:c12f2fa4a22775e16bb3ff",
     measurementId: "G-Q891NGK1YB",
-    databaseURL: "https://cafe-da-terezinha-default-rtdb.firebaseio.com/"
+    databaseURL: "https://cafe-da-santa-terezinha-default-rtdb.firebaseio.com/"
   };
 
   // Inicialize o Firebase
   const app = firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
 
-  // Armazenamento local de pedidos
-  let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
   
   const itens = [
     "Misto Quente", 
@@ -335,50 +333,50 @@
     document.getElementById(`qtd-${item}`).textContent = quantidades[item];
   }
 
-  function enviarPedido() {
-    const nome = document.getElementById("nome").value.trim();
-    if (!nome) {
-      alert("Digite seu nome.");
-      return;
-    }
+ function enviarPedido() {
+  const nome = document.getElementById("nome").value.trim();
+  if (!nome) {
+    alert("Digite seu nome.");
+    return;
+  }
 
-    // Filtrar apenas itens com quantidade > 0
-    const itensSelecionados = {};
-    for (let item in quantidades) {
-      if (quantidades[item] > 0) {
-        itensSelecionados[item] = quantidades[item];
-      }
-    }
-
-    if (Object.keys(itensSelecionados).length === 0) {
-      alert("Selecione pelo menos um item.");
-      return;
-    }
-
-    const novoPedido = {
-      nome: nome,
-      horario: new Date().toLocaleTimeString(),
-      itens: itensSelecionados,
-      finalizado: false,
-      id: Date.now() // ID único para cada pedido
-    };
-
-    // Adicionar ao Firebase Realtime Database
-    const pedidosRef = database.ref('pedidos');
-    pedidosRef.push(novoPedido);
-
-    // Mostrar confirmação
-    const confirmacao = document.getElementById("confirmacao");
-    confirmacao.classList.add("mostrar");
-    setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
-
-    // Limpar formulário
-    document.getElementById("nome").value = "";
-    for (let item in quantidades) {
-      quantidades[item] = 0;
-      document.getElementById(`qtd-${item}`).textContent = "0";
+  // Filtrar apenas itens com quantidade > 0
+  const itensSelecionados = {};
+  for (let item in quantidades) {
+    if (quantidades[item] > 0) {
+      itensSelecionados[item] = quantidades[item];
     }
   }
+
+  if (Object.keys(itensSelecionados).length === 0) {
+    alert("Selecione pelo menos um item.");
+    return;
+  }
+
+  const novoPedido = {
+    nome: nome,
+    horario: new Date().toLocaleTimeString(),
+    itens: itensSelecionados,
+    finalizado: false
+  };
+
+  // Enviar diretamente para o Firebase
+  const pedidosRef = database.ref('pedidos');
+  pedidosRef.push(novoPedido);
+
+  // Mostrar confirmação
+  const confirmacao = document.getElementById("confirmacao");
+  confirmacao.classList.add("mostrar");
+  setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
+
+  // Limpar formulário
+  document.getElementById("nome").value = "";
+  for (let item in quantidades) {
+    quantidades[item] = 0;
+    document.getElementById(`qtd-${item}`).textContent = "0";
+  }
+}
+
 
   function alternarTema() {
     document.body.classList.toggle("dark");
