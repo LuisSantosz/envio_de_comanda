@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CAFÉ DA TEREZINHA - PEDIDOS RECEBIDOS</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+
   <style>
  :root {
             /* Cores vibrantes - Modo Claro */
@@ -256,25 +259,44 @@
     </div>
   </div>
 
-  <script>
-    // Função para formatar os itens do pedido
-    function formatarItens(itens) {
-      return Object.entries(itens).map(([item, qtd]) => `${item}: ${qtd}`).join(', ');
-    }
+ <script>
+  // Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyChPsVAmwrgXgyHA72_yUoZYBxiTvaFThA",
+    authDomain: "cafe-da-terezinha.firebaseapp.com",
+    projectId: "cafe-da-terezinha",
+    storageBucket: "cafe-da-terezinha.appspot.com",
+    messagingSenderId: "841859662062",
+    appId: "1:841859662062:web:c12f2fa4a22775e16bb3ff",
+    measurementId: "G-Q891NGK1YB",
+    databaseURL: "https://cafe-da-terezinha-default-rtdb.firebaseio.com/"
+  };
 
-    // Função para carregar pedidos do localStorage
-    function carregarPedidos() {
-      const listaPedidos = document.getElementById('lista-pedidos');
-      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-      
+  // Inicialize o Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  // Função para formatar os itens do pedido
+  function formatarItens(itens) {
+    return Object.entries(itens).map(([item, qtd]) => `${item}: ${qtd}`).join(', ');
+  }
+
+  // Função para carregar pedidos do Firebase em tempo real
+  function carregarPedidos() {
+    const listaPedidos = document.getElementById('lista-pedidos');
+    const pedidosRef = database.ref('pedidos');
+    
+    pedidosRef.on('value', (snapshot) => {
       listaPedidos.innerHTML = '';
+      const pedidos = snapshot.val();
       
-      if (pedidos.length === 0) {
+      if (!pedidos) {
         listaPedidos.innerHTML = '<p style="text-align:center">Nenhum pedido encontrado</p>';
         return;
       }
       
-      pedidos.forEach((pedido) => {
+      Object.keys(pedidos).forEach((key) => {
+        const pedido = pedidos[key];
         const divPedido = document.createElement('div');
         divPedido.classList.add('pedido');
         if (pedido.finalizado) {
@@ -286,55 +308,56 @@
           <strong><i class="fas fa-utensils"></i> Itens:</strong> ${formatarItens(pedido.itens)}<br>
           <strong><i class="fas fa-clock"></i> Horário:</strong> ${pedido.horario}<br>
           ${!pedido.finalizado ? `
-            <button class="btn-finalizar" onclick="marcarComoFinalizado(${pedido.id})">
+            <button class="btn-finalizar" onclick="marcarComoFinalizado('${key}')">
               <i class="fas fa-check"></i> Marcar como Finalizado
             </button>
           ` : ''}
         `;
         listaPedidos.appendChild(divPedido);
       });
-    }
+    });
+  }
 
-    // Função para marcar pedido como finalizado
-    function marcarComoFinalizado(id) {
-      let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-      pedidos = pedidos.map(pedido => {
-        if (pedido.id === id) {
-          return {...pedido, finalizado: true};
+  // Função para marcar pedido como finalizado
+  function marcarComoFinalizado(id) {
+    const pedidoRef = database.ref('pedidos/' + id);
+    pedidoRef.update({ finalizado: true });
+  }
+
+  // Função para limpar todos os pedidos finalizados
+  function limparFinalizados() {
+    if (confirm('Tem certeza que deseja limpar todos os pedidos finalizados?')) {
+      const pedidosRef = database.ref('pedidos');
+      pedidosRef.once('value', (snapshot) => {
+        const pedidos = snapshot.val();
+        if (pedidos) {
+          Object.keys(pedidos).forEach((key) => {
+            if (pedidos[key].finalizado) {
+              database.ref('pedidos/' + key).remove();
+            }
+          });
         }
-        return pedido;
       });
-      localStorage.setItem('pedidos', JSON.stringify(pedidos));
-      carregarPedidos();
     }
+  }
 
-    // Função para limpar todos os pedidos finalizados
-    function limparFinalizados() {
-      if (confirm('Tem certeza que deseja limpar todos os pedidos finalizados?')) {
-        let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-        pedidos = pedidos.filter(pedido => !pedido.finalizado);
-        localStorage.setItem('pedidos', JSON.stringify(pedidos));
-        carregarPedidos();
-      }
-    }
+  // Alternar tema
+  function alternarTema() {
+    document.body.classList.toggle("dark");
+    const modo = document.body.classList.contains("dark") ? "dark" : "light";
+    localStorage.setItem("tema", modo);
+    document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+  }
 
-    // Alternar tema
-    function alternarTema() {
-      document.body.classList.toggle("dark");
-      const modo = document.body.classList.contains("dark") ? "dark" : "light";
-      localStorage.setItem("tema", modo);
-      document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+  // Inicializar
+  window.onload = () => {
+    const temaSalvo = localStorage.getItem("tema");
+    if (temaSalvo === "dark") {
+      document.body.classList.add("dark");
+      document.querySelector(".tema-btn").textContent = "☀️";
     }
-
-    // Inicializar
-    window.onload = () => {
-      const temaSalvo = localStorage.getItem("tema");
-      if (temaSalvo === "dark") {
-        document.body.classList.add("dark");
-        document.querySelector(".tema-btn").textContent = "☀️";
-      }
-      carregarPedidos();
-    }
-  </script>
+    carregarPedidos();
+  }
+</script>
 </body>
 </html>

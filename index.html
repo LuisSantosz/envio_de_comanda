@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CAFÉ DA TEREZINHA - ENVIO DE PEDIDOS</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
   <style>
  :root {
             /* Cores vibrantes - Modo Claro */
@@ -284,110 +286,124 @@
   <div id="confirmacao" class="mensagem-confirmacao">Pedido enviado com sucesso!</div>
 
   <script>
-    // Armazenamento local de pedidos
-    let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-    
-    const itens = [
-      "Misto Quente", 
-      "Pão na chapa", 
-      "Pão com manteiga", 
-      "Pão com ovo"
-    ];
-    const listaItens = document.getElementById('lista-itens');
-    const quantidades = {};
+  // Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyChPsVAmwrgXgyHA72_yUoZYBxiTvaFThA",
+    authDomain: "cafe-da-terezinha.firebaseapp.com",
+    projectId: "cafe-da-terezinha",
+    storageBucket: "cafe-da-terezinha.appspot.com",
+    messagingSenderId: "841859662062",
+    appId: "1:841859662062:web:c12f2fa4a22775e16bb3ff",
+    measurementId: "G-Q891NGK1YB",
+    databaseURL: "https://cafe-da-terezinha-default-rtdb.firebaseio.com/"
+  };
 
-    // Inicializar quantidades
-    itens.forEach(item => {
+  // Inicialize o Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+
+  // Armazenamento local de pedidos
+  let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+  
+  const itens = [
+    "Misto Quente", 
+    "Pão na chapa", 
+    "Pão com manteiga", 
+    "Pão com ovo"
+  ];
+  const listaItens = document.getElementById('lista-itens');
+  const quantidades = {};
+
+  // Inicializar quantidades
+  itens.forEach(item => {
+    quantidades[item] = 0;
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <span>${item}</span>
+      <div class="quantidade-controle">
+        <button onclick="mudarQuantidade('${item}', -1)">-</button>
+        <span id="qtd-${item}">0</span>
+        <button onclick="mudarQuantidade('${item}', 1)">+</button>
+      </div>
+    `;
+    listaItens.appendChild(div);
+  });
+
+  function mudarQuantidade(item, delta) {
+    quantidades[item] = Math.max(0, quantidades[item] + delta);
+    document.getElementById(`qtd-${item}`).textContent = quantidades[item];
+  }
+
+  function enviarPedido() {
+    const nome = document.getElementById("nome").value.trim();
+    if (!nome) {
+      alert("Digite seu nome.");
+      return;
+    }
+
+    // Filtrar apenas itens com quantidade > 0
+    const itensSelecionados = {};
+    for (let item in quantidades) {
+      if (quantidades[item] > 0) {
+        itensSelecionados[item] = quantidades[item];
+      }
+    }
+
+    if (Object.keys(itensSelecionados).length === 0) {
+      alert("Selecione pelo menos um item.");
+      return;
+    }
+
+    const novoPedido = {
+      nome: nome,
+      horario: new Date().toLocaleTimeString(),
+      itens: itensSelecionados,
+      finalizado: false,
+      id: Date.now() // ID único para cada pedido
+    };
+
+    // Adicionar ao Firebase Realtime Database
+    const pedidosRef = database.ref('pedidos');
+    pedidosRef.push(novoPedido);
+
+    // Mostrar confirmação
+    const confirmacao = document.getElementById("confirmacao");
+    confirmacao.classList.add("mostrar");
+    setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
+
+    // Limpar formulário
+    document.getElementById("nome").value = "";
+    for (let item in quantidades) {
       quantidades[item] = 0;
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <span>${item}</span>
-        <div class="quantidade-controle">
-          <button onclick="mudarQuantidade('${item}', -1)">-</button>
-          <span id="qtd-${item}">0</span>
-          <button onclick="mudarQuantidade('${item}', 1)">+</button>
-        </div>
-      `;
-      listaItens.appendChild(div);
+      document.getElementById(`qtd-${item}`).textContent = "0";
+    }
+  }
+
+  function alternarTema() {
+    document.body.classList.toggle("dark");
+    const modo = document.body.classList.contains("dark") ? "dark" : "light";
+    localStorage.setItem("tema", modo);
+    document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
+  }
+
+  // Corrigir comportamento dos links
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      if (this.getAttribute('href').endsWith('.html')) {
+        e.preventDefault();
+        window.location.href = this.getAttribute('href');
+      }
     });
+  });
 
-    function mudarQuantidade(item, delta) {
-      quantidades[item] = Math.max(0, quantidades[item] + delta);
-      document.getElementById(`qtd-${item}`).textContent = quantidades[item];
+  window.onload = () => {
+    const temaSalvo = localStorage.getItem("tema");
+    if (temaSalvo === "dark") {
+      document.body.classList.add("dark");
+      document.querySelector(".tema-btn").textContent = "☀️";
     }
-
-    function enviarPedido() {
-      const nome = document.getElementById("nome").value.trim();
-      if (!nome) {
-        alert("Digite seu nome.");
-        return;
-      }
-
-      // Filtrar apenas itens com quantidade > 0
-      const itensSelecionados = {};
-      for (let item in quantidades) {
-        if (quantidades[item] > 0) {
-          itensSelecionados[item] = quantidades[item];
-        }
-      }
-
-      if (Object.keys(itensSelecionados).length === 0) {
-        alert("Selecione pelo menos um item.");
-        return;
-      }
-
-      const novoPedido = {
-        nome: nome,
-        horario: new Date().toLocaleTimeString(),
-        itens: itensSelecionados,
-        finalizado: false,
-        id: Date.now() // ID único para cada pedido
-      };
-
-      // Adicionar ao array de pedidos
-      pedidos.push(novoPedido);
-      
-      // Salvar no localStorage
-      localStorage.setItem('pedidos', JSON.stringify(pedidos));
-
-      // Mostrar confirmação
-      const confirmacao = document.getElementById("confirmacao");
-      confirmacao.classList.add("mostrar");
-      setTimeout(() => confirmacao.classList.remove("mostrar"), 3000);
-
-      // Limpar formulário
-      document.getElementById("nome").value = "";
-      for (let item in quantidades) {
-        quantidades[item] = 0;
-        document.getElementById(`qtd-${item}`).textContent = "0";
-      }
-    }
-
-    function alternarTema() {
-      document.body.classList.toggle("dark");
-      const modo = document.body.classList.contains("dark") ? "dark" : "light";
-      localStorage.setItem("tema", modo);
-      document.querySelector(".tema-btn").textContent = modo === "dark" ? "☀️" : "🌙";
-    }
-
-    // Corrigir comportamento dos links
-    document.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', function(e) {
-        if (this.getAttribute('href').endsWith('.html')) {
-          e.preventDefault();
-          window.location.href = this.getAttribute('href');
-        }
-      });
-    });
-
-    window.onload = () => {
-      const temaSalvo = localStorage.getItem("tema");
-      if (temaSalvo === "dark") {
-        document.body.classList.add("dark");
-        document.querySelector(".tema-btn").textContent = "☀️";
-      }
-    }
-  </script>
+  }
+</script>
 </body>
 </html>
